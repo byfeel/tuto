@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <title>Demo ESP8266 dynamique</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+      <link rel="stylesheet" href="bootstrap.min.css" media="screen">
+    </head>
+<body>
+    <div class="jumbotron">
+        <h2 class="display-4">ESP8266 Dynamique </h2>
+    <p class="lead">Demo DHT + Commande GPIO</p>
+    </div>
+<div class="container">
+<div class="row">
+    <div class="col-lg-6">
+    <div class="card text-white bg-primary mb-3 text-center" style="max-width: 20rem;">
+  <div class="card-header" id="thermo">Thermometre </div>
+  <div class="card-body text-center">
+
+        <h2 class="display-3"><span id="Temp"></span> &deg;C</h2>
+         <h2 class="display-4"><span id="Hum"></span> %</h2>
+    <p class="card-text" >Confort : <span id="Confort"></span></p>
+    </div>
+          </div>
+</div>
+    <div class="col-lg-6">
+
+<form action='/setLED' method='POST' id='FormLED'>
+    <div class="form-group">
+      <legend>On/Off LED interne ( GPIO2)</legend>
+    <div class="form-check form-check-inline">
+        <INPUT class="form-check-input" type='radio' name='LED' value='on' id='on' checked>
+  <label class="form-check-label" for='on'>
+    ON
+  </label>
+</div>
+<div class="form-check form-check-inline">
+<INPUT class="form-check-input" type='radio' name='LED' value='off' id='off'>
+
+  <label class="form-check-label" for="off">
+   OFF
+  </label>
+</div>
+   </div>
+    <INPUT type='submit' value='Envoyer' id='bouton_LED' class="btn btn-outline-secondary"/>
+     
+    </form>
+
+    <div id="info"></div>
+        </div>
+    </div>
+    </div>
+    <!-- Footer -->
+<footer class="footer">
+     <div class="container-fluid bg-primary text-center fixed-bottom">
+        <span class="text-muted"> © 2018 
+    <a href="https://mdbootstrap.com/bootstrap-tutorial/"> byfeel.info</a></span>
+      </div>
+</footer>
+<!-- Footer -->
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+ <script src="jquery.min.js"></script>
+    <script src="bootstrap.min.js"></script>
+<script>
+   $("#FormLED").submit(function(){
+    $.ajax({
+                url: '/setLED',
+                type: 'post',
+                data: $("#FormLED").serialize(),
+                success: function(data) {
+                   $("#info").html("<p> Commande LED : "+data+"</p>");
+                }
+        });
+    return false;
+}); 
+    
+ function loadInfo(){
+      //alert("valeur :");
+        $.getJSON('/getInfo', function(jthermo) {
+               
+                  $('#Temp').text(jthermo.T);
+                $('#Hum').text(jthermo.H);
+            if (jthermo.Confort=="OK")  {
+              $('#thermo').attr('class','card-header bg-success')  
+            }
+            else {
+              $('#thermo').attr('class','card-header bg-danger')    
+            }
+            $('#Confort').text(jthermo.Confort);
+
+               });
+}
+    
+loadInfo(); // premiere execution
+setInterval(function(){
+    loadInfo() // rappel toutes les 10 secondes
+}, 10000);
+    
+
+</script>
+
+</body>
+</html>
+
